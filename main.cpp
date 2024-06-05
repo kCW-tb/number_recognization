@@ -68,7 +68,7 @@ void copyimg(Mat& img, Rect area, Mat& copy) {
 }
 Mat drawLineImg() {
     Mat board(500, 800, CV_8UC3, Scalar(255, 255, 255));
-    rectangle(board, Rect(0, 0, 500, 650), Scalar(0, 0, 0), 2);
+    rectangle(board, Rect(0, 0, 500, 650), Scalar(0, 0, 0), 1);
     rectangle(board, Rect(500, 0, 150, 100), Scalar(0, 0, 0), 2);       //Save  Rect(500, 0, 150, 100)
     rectangle(board, Rect(500, 100, 150, 100), Scalar(0, 0, 0), 2);     //Load  Rect(500, 100, 150, 100)
     rectangle(board, Rect(500, 200, 150, 100), Scalar(0, 0, 0), 2);     //Clear Rect(500, 200, 150, 100)
