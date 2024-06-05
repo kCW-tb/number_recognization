@@ -225,7 +225,7 @@ Mat loadfile() {
         if (number.empty()) { cout << "none img, enter the correct file name"; }
         else break;
     }
-    rectangle(number, Rect(0, 0, 500, 500), Scalar(0, 0, 0), 2);
+    rectangle(number, Rect(0, 0, 500, 500), Scalar(0, 0, 0), 1);
     return number;
 }
 
