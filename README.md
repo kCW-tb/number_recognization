@@ -1,7 +1,7 @@
 # number_recognization
 
+**이미지 전처리 관련 함수**
 ```
-//이미지 전처리 관련 함수
 //1번 GrayScale + Threshold
 Mat grayThres(Mat numberimg) {
     cvtColor(numberimg, numberimg, COLOR_BGR2GRAY);
@@ -46,3 +46,25 @@ Mat PretreatmentImg(Mat origin_numberimg) {
 ```
 
 [작동 영상](https://youtu.be/G28ypY8kamA)
+
+
+**Run에 사용되는 함수들**
+
+```
+//1번 이미지 객체에 대해 외각선 개수 추출
+int contours_size(Mat img) {
+    vector<vector<int>> contours;
+    findContours(img, contours, RETR_LIST, CHAIN_APPROX_NONE);
+    return contours.size();
+}
+//2번 내부 외각선이 없으면 pass 내부 외각선이 있다면 전체 객체와 내부외각선 무게중심을 비교
+bool weight_contours(Mat img) {
+    vector<vector<int>> contours;
+    findContours(img, contours, RETR_LIST, CHAIN_APPROX_NONE);
+    
+    //임시값 true 반환
+    return true;
+}
+//3번 객체에 선을 그어 만나는 외각선 개수 판별
+//4번 중앙 영역(가로로 직사각형)제거하고 생기는 외각선 개수 판별
+```
