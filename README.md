@@ -48,7 +48,9 @@ Mat PretreatmentImg(Mat origin_numberimg) {
 [작동 영상](https://youtu.be/G28ypY8kamA)
 
 
-**Run에 사용되는 함수들**
+
+
+**Run에 사용되는 함수들(미완)**
 
 ```
 //1번 이미지 객체에 대해 외각선 개수 추출
@@ -57,14 +59,44 @@ int contours_size(Mat img) {
     findContours(img, contours, RETR_LIST, CHAIN_APPROX_NONE);
     return contours.size();
 }
-//2번 내부 외각선이 없으면 pass 내부 외각선이 있다면 전체 객체와 내부외각선 무게중심을 비교
-bool weight_contours(Mat img) {
+//2번 내부 외각선이 없으면 pass 내부 외각선이 있다면 전체 객체와 내부외각선 무게중심을 비교 6,4,9판별을 위한 조건
+int weight_contours(Mat img) {
     vector<vector<int>> contours;
     findContours(img, contours, RETR_LIST, CHAIN_APPROX_NONE);
-    
-    //임시값 true 반환
-    return true;
+    Point out_contours(0, 0), in_contours(0, 0);
+    if (contours.size() >= 3) {
+        RotatedRect rect = minAreaRect(contours);
+        int eight_zero = contours_size(img(Rect(0, rect.center.y, img.cols, img.rows)));
+        if (eight_zero == 2 || eight_zero == 1) return 8;
+        else if(eight_zero == 3) return 0;
+    }
+    else if (contours.size() == 2) {
+        for (int i = 0; i < contours[0].size(); i++) {
+            out_contours += Point(contours[0][i]);
+        }
+        for (int i = 0; i < contours[1].size(); i++) {
+            in_contours += Point(contours[1][i]);
+        }
+        out_contours.y /= contours[0].size();
+        in_contours.y /= contours[1].size();
+        if (in_contours.y > out_contours.y) return 9; //4도 가능
+        if (in_contours.y < out_contours.y) return 6;
+    }
+    //임시값 반환
+    return 2;
 }
 //3번 객체에 선을 그어 만나는 외각선 개수 판별
 //4번 중앙 영역(가로로 직사각형)제거하고 생기는 외각선 개수 판별
 ```
+
+![image](https://github.com/kCW-tb/number_recognization/assets/71691159/84b21052-47c0-4367-9575-dad620d365af)
+
+```
+ RotatedRect rect = minAreaRect(contours);
+ int eight_zero = contours_size(img(Rect(0, rect.center.y, img.cols, 1)));
+ if (eight_zero == 2 || eight_zero == 1) return 8;
+ else if(eight_zero == 3) return 0;
+```
+사진에 대해 1 pixel의 row값을 가진 사각형 영역에 대하여 외각선 검출을 하는 함수에 대한 예시
+
+
