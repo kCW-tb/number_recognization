@@ -118,7 +118,7 @@ Mat get_numberArea(Mat preImg) {
     int cnt = connectedComponentsWithStats(preImg, labels, stats, centroids);
     //숫자 객체가 분리되어 있는 경우
     if (cnt > 2) {
-        int largth = 10;
+        int largth = 13;
         while (true) {
             //점차 증가하는 length값으로 모폴로지 연산 수행
             morphologyEx(preImg, preImg, MORPH_CLOSE, Mat(largth, largth, CV_8UC1));
