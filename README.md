@@ -19,9 +19,10 @@ Mat get_numberArea(Mat preImg) {
         int largth = 13;
         while (true) {
             //점차 증가하는 length값으로 모폴로지 연산 수행
-            morphologyEx(preImg, preImg, MORPH_CLOSE, Mat(largth++, largth++, CV_8UC1));
+            morphologyEx(preImg, preImg, MORPH_CLOSE, Mat(largth, largth, CV_8UC1));
             cnt = connectedComponentsWithStats(preImg, labels, stats, centroids);
             if (cnt <= 2) break;
+            largth += 3;
         }
     }
     int* p = stats.ptr<int>(1);
@@ -44,4 +45,4 @@ Mat PretreatmentImg(Mat origin_numberimg) {
 }
 ```
 
-[작동 영상](https://youtu.be/gtpnqKj_-m0)
+[작동 영상](https://youtu.be/G28ypY8kamA)
