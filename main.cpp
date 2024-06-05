@@ -14,6 +14,18 @@ Mat run_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Run_black.jpg
 Mat run_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Run_red.jpg");
 Mat exit_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Exit_black.jpg");
 Mat exit_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Exit_red.jpg");
+Mat feature1_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature1_black.jpg");
+Mat feature2_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature2_black.jpg");
+Mat feature3_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature3_black.jpg");
+Mat feature4_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature4_black.jpg");
+Mat feature5_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature5_black.jpg");
+Mat feature6_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature6_black.jpg");
+Mat feature1_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature1_red.jpg");
+Mat feature2_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature2_red.jpg");
+Mat feature3_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature3_red.jpg");
+Mat feature4_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature4_red.jpg");
+Mat feature5_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature5_red.jpg");
+Mat feature6_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature6_red.jpg");
 
 //menu
 void copyimg(Mat& img, Rect area, Mat& copy);
@@ -52,19 +64,29 @@ void copyimg(Mat& img, Rect area, Mat& copy) {
     copy.copyTo(img(Rect(start.x, start.y, copy.cols, copy.rows)));
 }
 Mat drawLineImg() {
-    Mat board(500, 650, CV_8UC3, Scalar(255, 255, 255));
+    Mat board(500, 800, CV_8UC3, Scalar(255, 255, 255));
     rectangle(board, Rect(0, 0, 500, 650), Scalar(0, 0, 0), 2);
     rectangle(board, Rect(500, 0, 150, 100), Scalar(0, 0, 0), 2);       //Save  Rect(500, 0, 150, 100)
     rectangle(board, Rect(500, 100, 150, 100), Scalar(0, 0, 0), 2);     //Load  Rect(500, 100, 150, 100)
     rectangle(board, Rect(500, 200, 150, 100), Scalar(0, 0, 0), 2);     //Clear Rect(500, 200, 150, 100)
     rectangle(board, Rect(500, 300, 150, 100), Scalar(0, 0, 0), 2);     //Run   Rect(500, 300, 150, 100)
     rectangle(board, Rect(500, 400, 150, 100), Scalar(0, 0, 0), 2);     //Exit  Rect(500, 400, 150, 100)
+    rectangle(board, Rect(650, 0, 150, 100), Scalar(0, 0, 0), 2);   //feature1
+    rectangle(board, Rect(650, 100, 150, 100), Scalar(0, 0, 0), 2);   //feature2
+    rectangle(board, Rect(650, 200, 150, 100), Scalar(0, 0, 0), 2);   //feature3
+    rectangle(board, Rect(650, 300, 150, 100), Scalar(0, 0, 0), 2);   //feature4
+    rectangle(board, Rect(650, 400, 150, 100), Scalar(0, 0, 0), 2);   //feature5
 
     copyimg(board, Rect(500, 0, 150, 100), save_black);
     copyimg(board, Rect(500, 100, 150, 100), load_black);
     copyimg(board, Rect(500, 200, 150, 100), clear_black);
     copyimg(board, Rect(500, 300, 150, 100), run_black);
     copyimg(board, Rect(500, 400, 150, 100), exit_black);
+    copyimg(board, Rect(650, 0, 150, 100), feature1_black);
+    copyimg(board, Rect(650, 100, 150, 100), feature2_black);
+    copyimg(board, Rect(650, 200, 150, 100), feature3_black);
+    copyimg(board, Rect(650, 300, 150, 100), feature4_black);
+    copyimg(board, Rect(650, 400, 150, 100), feature5_black);
 
     return board;
 }
@@ -74,6 +96,11 @@ void turn_menu_color(Mat board) {
     copyimg(board, Rect(500, 200, 150, 100), clear_black);
     copyimg(board, Rect(500, 300, 150, 100), run_black);
     copyimg(board, Rect(500, 400, 150, 100), exit_black);
+    copyimg(board, Rect(650, 0, 150, 100), feature1_black);
+    copyimg(board, Rect(650, 100, 150, 100), feature2_black);
+    copyimg(board, Rect(650, 200, 150, 100), feature3_black);
+    copyimg(board, Rect(650, 300, 150, 100), feature4_black);
+    copyimg(board, Rect(650, 400, 150, 100), feature5_black);
 }
 
 //이미지 전처리 관련 함수
@@ -94,13 +121,14 @@ Mat get_numberArea(Mat preImg) {
         int largth = 10;
         while (true) {
             //점차 증가하는 length값으로 모폴로지 연산 수행
-            morphologyEx(preImg, preImg, MORPH_CLOSE, Mat(largth++, largth++, CV_8UC1));
+            morphologyEx(preImg, preImg, MORPH_CLOSE, Mat(largth, largth, CV_8UC1));
             cnt = connectedComponentsWithStats(preImg, labels, stats, centroids);
             if (cnt <= 2) break;
+            largth += 3;
         }
     }
     int* p = stats.ptr<int>(1);
-    return preImg(Rect(p[0], p[1], p[2], p[3]));
+    return preImg(Rect(p[0], p[1], p[2], p[3])).clone();
 }
 
 //4번
@@ -114,7 +142,7 @@ Mat PretreatmentImg(Mat origin_numberimg) {
     Mat preImg = grayThres(origin_numberimg);   //GrayScale 변경 및 이진화
     morphologyEx(preImg, preImg, MORPH_CLOSE, Mat(10, 10, CV_8UC1)); //모폴로지 연산
     Mat numberImg = get_numberArea(preImg);     //숫자영역만 추출
-    sizerepair(numberImg);
+    sizerepair(numberImg);  //size수정
     return numberImg;
 }
 
@@ -155,6 +183,7 @@ Mat loadfile() {
 void on_mouse(int event, int x, int y, int flags, void* userdata) {
     static Point prePoint = Point(0, 0);
     Rect save(500, 0, 148, 100), load(500, 100, 148, 100), clear(500, 200, 148, 100), run(500, 300, 148, 100), exit_f(500, 400, 148, 100);
+    Rect feature1(650, 0, 148, 100), feature2(650, 100, 148, 100), feature3(650, 200, 148, 100), feature4(650, 300, 148, 100), feature5(650, 400, 148, 100);
     if (Point(x, y).inside(save)) {
         turn_menu_color(*(Mat*)userdata);
         copyimg(*(Mat*)userdata, save, save_red);
@@ -175,6 +204,26 @@ void on_mouse(int event, int x, int y, int flags, void* userdata) {
         turn_menu_color(*(Mat*)userdata);
         copyimg(*(Mat*)userdata, exit_f, exit_red);
     }
+    else if (Point(x, y).inside(feature1)) {
+        turn_menu_color(*(Mat*)userdata);
+        copyimg(*(Mat*)userdata, feature1, feature1_red);
+    }
+    else if (Point(x, y).inside(feature2)) {
+        turn_menu_color(*(Mat*)userdata);
+        copyimg(*(Mat*)userdata, feature2, feature2_red);
+    }
+    else if (Point(x, y).inside(feature3)) {
+        turn_menu_color(*(Mat*)userdata);
+        copyimg(*(Mat*)userdata, feature3, feature3_red);
+    }
+    else if (Point(x, y).inside(feature4)) {
+        turn_menu_color(*(Mat*)userdata);
+        copyimg(*(Mat*)userdata, feature4, feature4_red);
+    }
+    else if (Point(x, y).inside(feature5)) {
+        turn_menu_color(*(Mat*)userdata);
+        copyimg(*(Mat*)userdata, feature5, feature5_red);
+    }
     else {
         turn_menu_color(*(Mat*)userdata);
     }
@@ -184,7 +233,7 @@ void on_mouse(int event, int x, int y, int flags, void* userdata) {
         prePoint = Point(x, y);
         if (Point(x, y).inside(Rect(500, 300, 150, 100))) {
             //Run
-            Mat preimg = PretreatmentImg((*(Mat*)userdata)(Rect(1, 1, 498, 498)));
+            Mat preimg = PretreatmentImg((*(Mat*)userdata)(Rect(2, 2, 497, 497)));
             imshow("preImg", preimg);
             waitKey();
         }
