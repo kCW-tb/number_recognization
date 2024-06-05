@@ -36,6 +36,9 @@ Mat grayThres(Mat numberimg);
 Mat get_numberArea(Mat origin_numberimg);
 void sizerepair(Mat& preImg);
 //feature
+int contours_size(Mat img);
+int weight_contours(Mat img);
+
 
 //mouse_event
 void on_mouse(int event, int x, int y, int flags, void* userdata);
@@ -148,7 +151,54 @@ Mat PretreatmentImg(Mat origin_numberimg) {
 
 //feature 관련 함수
 //1번 이미지 객체에 대해 외각선 개수 추출
-//2번 내부 외각선이 없으면 pass 내부 외각선이 있다면 전체 객체와 내부외각선 무게중심을 비교
+int contours_size(Mat img) {
+    vector<vector<int>> contours;
+    findContours(img, contours, RETR_LIST, CHAIN_APPROX_NONE);
+    return contours.size();
+}
+//2번 내부 외각선이 없으면 pass 내부 외각선이 있다면 전체 객체와 내부외각선 무게중심을 비교 6,4,9판별을 위한 조건
+int weight_contours(Mat img) {
+    vector<vector<int>> contours;
+    findContours(img, contours, RETR_LIST, CHAIN_APPROX_NONE);
+    Point out_contours(0, 0), in_contours(0, 0);
+    if (contours.size() >= 3) {
+        RotatedRect rect = minAreaRect(contours);
+        int eight_zero = contours_size(img(Rect(0, rect.center.y, img.cols, 1)));
+        if (eight_zero == 2 || eight_zero == 1) {
+            cout << endl << "해당 특성 결과는 8입니다." << endl;
+            return 8;
+        }
+        else if (eight_zero == 3) { 
+            cout << endl << "해당 특성 결과는 0입니다." << endl;
+            return 0; 
+        }
+    }
+    else if (contours.size() == 2) {
+        for (int i = 0; i < contours[0].size(); i++) {
+            out_contours += Point(contours[0][i]);
+        }
+        for (int i = 0; i < contours[1].size(); i++) {
+            in_contours += Point(contours[1][i]);
+        }
+        out_contours.y /= contours[0].size();
+        in_contours.y /= contours[1].size();
+        if (in_contours.y > out_contours.y) {
+            cout << endl << "4, 9, 0 중 하나입니다." << endl;
+            return 9; //4도 가능
+        }
+        if (in_contours.y < out_contours.y) {
+            cout << endl << "6, 0 중 하나입니다." << endl;
+            return 6;
+        }
+    }
+    else if (contours.size() == 1) {
+        cout << endl << "1, 2, 3, 4, 5, 7 중 하나입니다." << endl;
+        // 1, 2, 3, 4, 5, 7 총 6개라....
+        return 1;
+    }
+    //임시값 반환 후에 고쳐야 함.
+    return 2;
+}
 //3번 객체에 선을 그어 만나는 외각선 개수 판별
 //4번 중앙 영역(가로로 직사각형)제거하고 생기는 외각선 개수 판별
 
