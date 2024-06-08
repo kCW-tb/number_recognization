@@ -100,3 +100,9 @@ int weight_contours(Mat img) {
 사진에 대해 1 pixel의 row값을 가진 사각형 영역에 대하여 외각선 검출을 하는 함수에 대한 예시
 
 
+
+
+
+
+
+[중간인식과정](https://youtu.be/wSoOFS5d_Bc)
