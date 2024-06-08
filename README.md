@@ -103,6 +103,6 @@ int weight_contours(Mat img) {
 
 
 
-
+아직 특성이 충분치 않아 중복으로 모든 조건의 합이 5가 되는 경우가 존재 특성을 늘리거나 조정이 필요
 
 [중간인식과정](https://youtu.be/wSoOFS5d_Bc)
