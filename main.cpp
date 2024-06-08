@@ -39,7 +39,7 @@ void sizerepair(Mat& preImg);
 void contours_size(Mat img);
 void weight_contours(Mat img);
 void erase_rArea(Mat img);
-
+void ru_2_ld(Mat img);
 
 //mouse_event
 void on_mouse(int event, int x, int y, int flags, void* userdata);
@@ -90,10 +90,10 @@ Mat drawLineImg() {
     copyimg(board, Rect(500, 300, 150, 100), run_black);
     copyimg(board, Rect(500, 400, 150, 100), exit_black);
     copyimg(board, Rect(650, 0, 150, 100), feature1_black);
-    copyimg(board, Rect(650, 100, 150, 100), feature1_black);
-    copyimg(board, Rect(650, 200, 150, 100), feature1_black);
-    copyimg(board, Rect(650, 300, 150, 100), feature1_black);
-    copyimg(board, Rect(650, 400, 150, 100), feature1_black);
+    copyimg(board, Rect(650, 100, 150, 100), feature2_black);
+    copyimg(board, Rect(650, 200, 150, 100), feature3_black);
+    copyimg(board, Rect(650, 300, 150, 100), feature4_black);
+    copyimg(board, Rect(650, 400, 150, 100), feature5_black);
 
     return board;
 }
@@ -104,10 +104,10 @@ void turn_menu_color(Mat board) {
     copyimg(board, Rect(500, 300, 150, 100), run_black);
     copyimg(board, Rect(500, 400, 150, 100), exit_black);
     copyimg(board, Rect(650, 0, 150, 100), feature1_black);
-    copyimg(board, Rect(650, 100, 150, 100), feature1_black);
-    copyimg(board, Rect(650, 200, 150, 100), feature1_black);
-    copyimg(board, Rect(650, 300, 150, 100), feature1_black);
-    copyimg(board, Rect(650, 400, 150, 100), feature1_black);
+    copyimg(board, Rect(650, 100, 150, 100), feature2_black);
+    copyimg(board, Rect(650, 200, 150, 100), feature3_black);
+    copyimg(board, Rect(650, 300, 150, 100), feature4_black);
+    copyimg(board, Rect(650, 400, 150, 100), feature5_black);
 }
 
 //이미지 전처리 관련 함수
@@ -153,7 +153,7 @@ Mat PretreatmentImg(Mat origin_numberimg) {
 //feature 관련 함수
 //1번 이미지 객체에 대해 외각선 개수 추출 - stop
 void contours_size(Mat img) {
-    vector<vector<int>> contours;
+    vector<vector<Point>> contours;
     findContours(img, contours, RETR_LIST, CHAIN_APPROX_NONE);
     if (contours.size() == 1) {
         //1, 2, 3, 4, 5, 7
@@ -167,6 +167,10 @@ void contours_size(Mat img) {
     }
     else if (contours.size() == 2) {
         //4,6,9,0
+        identify_number[1][0] = -5;
+        identify_number[2][0] = -5;
+        identify_number[3][0] = -5;
+        identify_number[7][0] = -5;
         identify_number[4][0] = 1;
         identify_number[6][0] = 1;
         identify_number[9][0] = 1;
@@ -175,23 +179,30 @@ void contours_size(Mat img) {
     }
     else {
         //0, 8
+        identify_number[1][0] = -5;
+        identify_number[2][0] = -5;
+        identify_number[3][0] = -5;
+        identify_number[7][0] = -5;
         identify_number[0][0] = 1;
         identify_number[8][0] = 1;
         cout << "가능 숫자 : 8, 0" << endl;
     }
     cout << "해당 숫자 객체에 대한 외각선 개수 : " << contours.size() << endl;
 }
-//2번 내부 외각선이 없으면 false 내부 외각선이 있다면 전체 객체와 내부외각선 무게중심을 비교 6,4,9판별을 위한 조건 - stop
+//2번 내부 외각선이 없으면 false 내부 외각선이 있다면 전체 객체와 내부외각선 무게중심을 비교 6,4,9판별을 위한 조건
 void weight_contours(Mat img) {
     cout << "내부 외각전 유무와 내부 외각선에 대한 무게중심 비교." << endl;
-    vector<vector<int>> contours, min_contours;
+    vector<vector<Point>> contours, min_contours;
     findContours(img, contours, RETR_LIST, CHAIN_APPROX_NONE);
     Point out_contours(0, 0), in_contours(0, 0);
     if (contours.size() >= 3) {
         cout << "내부 외각선 2개 존재" << endl;
-        RotatedRect rect = minAreaRect(contours);
+        RotatedRect rect = minAreaRect(contours[2]);
         findContours(img(Rect(0, rect.center.y, img.cols, 1)), min_contours, RETR_LIST, CHAIN_APPROX_NONE);
         int eight_zero = min_contours.size();
+        img(Rect(0, rect.center.y, img.cols, 1)) = 0;
+        //imshow("dddd", img);
+        //waitKey();
         if (eight_zero == 2 || eight_zero == 1) {
             identify_number[8][1] = 1;
             cout << endl << "해당 특성 결과는 8입니다." << endl;
@@ -201,7 +212,28 @@ void weight_contours(Mat img) {
             cout << endl << "해당 특성 결과는 0입니다." << endl;
         }
     }
-    else if (contours.size() == 2) {   
+    /*
+    //boundingRect사용방법
+    if (contours.size() >= 3) {
+        cout << "내부 외각선 2개 존재" << endl;
+        Rect rec = boundingRect(contours[2]);
+        Mat lables, eight_or_zero = img(Rect(0, rec.y + rec.height / 2, img.cols, 1)).clone();
+        int count_8_0 = connectedComponents(eight_or_zero, lables);
+        count_8_0 -= 1;
+        img(Rect(0, rec.y + rec.height / 2, img.cols, 1)) = 0;
+        imshow("dddd", img);
+        waitKey();
+        if (count_8_0 == 2 || count_8_0 == 1) {
+            identify_number[8][1] = 1;
+            cout << endl << "해당 특성 결과는 8입니다." << endl;
+        }
+        else {
+            identify_number[0][1] = 1;
+            cout << endl << "해당 특성 결과는 0입니다." << endl;
+        }
+    }
+    */
+    else if (contours.size() == 2) {
         cout << "내부 외각선 1개 존재 " << endl;
         for (int i = 0; i < contours[0].size(); i++) {
             out_contours += Point(contours[0][i]);
@@ -238,14 +270,120 @@ void weight_contours(Mat img) {
         cout << endl << "1, 2, 3, 4, 5, 7 중 하나입니다." << endl;
     }
 }
-//3번 객체에 선을 그어 만나는 외각선 개수 판별
-
-//4번 우측 영역(세로로 직사각형)제거하고 생기는 외각선 개수 판별 - stop
+//3번 우측 상단 시작점에서 좌측 하단 끝나는 종료점까지 선을 그어 만나는 외각선 개수 판별 - stop
+void ru_2_ld(Mat img) {
+    Mat tmp_img = img.clone();
+    Mat line_img(Size(img.cols, img.rows), CV_8UC3, Scalar(0,0,0));
+    tmp_img /= 2;
+    line(line_img, Point(tmp_img.cols - 51, 0), Point(50, tmp_img.rows - 1), Scalar(200, 200, 200), 3);
+    cvtColor(line_img, line_img, COLOR_BGR2GRAY);
+    addWeighted(tmp_img, 1, line_img, 1, 0, tmp_img);
+    threshold(tmp_img, tmp_img, 250, 255, THRESH_BINARY);
+    //imshow("tmp_img", tmp_img);
+    //waitKey();
+    Mat labels, stats, centroids;
+    int num_labels = connectedComponentsWithStats(tmp_img, labels, stats, centroids);
+    num_labels -= 1; //배경 제거
+    if (num_labels == 1) {
+        //1, 7, 4
+        cout << "우측 상단에서 좌측 하단으로 선을 그을 때 접촉하는 외각선 개수 1개" << endl;
+        cout << "1, 7, 4 중 하나입니다." << endl;
+        identify_number[6][2] = -5;
+        identify_number[9][2] = -5;
+        identify_number[8][2] = -5;
+        identify_number[0][2] = -5;
+        identify_number[1][2] = 1;
+        identify_number[4][2] = 1;
+        identify_number[7][2] = 1;
+    }
+    else if (num_labels == 2) {
+        //1, 2, 6, 9, 0
+        cout << "우측 상단에서 좌측 하단으로 선을 그을 때 접촉하는 외각선 개수 2개" << endl;
+        cout << "1, 2, 6, 9, 0 중 하나입니다." << endl;
+        identify_number[0][2] = 1;
+        identify_number[1][2] = 1;
+        identify_number[2][2] = 1;
+        identify_number[6][2] = 1;
+        identify_number[9][2] = 1;
+    }
+    else if (num_labels == 3) {
+        //3, 5, 6, 8
+        cout << "우측 상단에서 좌측 하단으로 선을 그을 때 접촉하는 외각선 개수 3개" << endl;
+        cout << "3, 5, 6, 8 중 하나입니다." << endl;
+        identify_number[3][2] = 1;
+        identify_number[5][2] = 1;
+        identify_number[6][2] = 1;
+        identify_number[8][2] = 1;
+    }
+    else {
+        //3, 8
+        cout << "우측 상단에서 좌측 하단으로 선을 그을 때 접촉하는 외각선 개수 4개 이상" << endl;
+        cout << "해당 특성에 대한 수는 8입니다." << endl;
+        identify_number[8][2] = 1;
+        identify_number[3][2] = 1;
+    }
+}
+//4번 우측 상단 시작점에서 좌측 하단 끝나는 종료점까지 선을 그어 만나는 외각선 개수 판별 - stop
+void lu_2_rd(Mat img) {
+    Mat tmp_img = img.clone();
+    Mat line_img(Size(img.cols, img.rows), CV_8UC3, Scalar(0, 0, 0));
+    tmp_img /= 2;
+    line(line_img, Point(0, 0), Point(tmp_img.cols - 100, tmp_img.rows), Scalar(200, 200, 200), 3);
+    cvtColor(line_img, line_img, COLOR_BGR2GRAY);
+    addWeighted(tmp_img, 1, line_img, 1, 0, tmp_img);
+    threshold(tmp_img, tmp_img, 250, 255, THRESH_BINARY);
+    Mat labels, stats, centroids;
+    int num_labels = connectedComponentsWithStats(tmp_img, labels, stats, centroids);
+    num_labels -= 1;
+    //imshow("tmp_img", tmp_img);
+    //waitKey();
+    if (num_labels == 1) {
+        //1, 3
+        cout << "좌측 상단에서 우측 하단으로 선을 그을 때 접촉하는 외각선 개수 1개" << endl;
+        cout << "1, 7, 4 중 하나입니다." << endl;
+        identify_number[1][3] = 1;
+        identify_number[4][3] = 1;
+        identify_number[7][3] = 1;
+    }
+    else if (num_labels == 2) {
+        //2, 3, 7, 0
+        cout << "좌측 상단에서 우측 하단으로 선을 그을 때 접촉하는 외각선 개수 2개" << endl;
+        cout << "2, 3, 9, 0 중 하나입니다." << endl;
+        identify_number[0][3] = 1;
+        identify_number[2][3] = 1;
+        identify_number[3][3] = 1;
+        identify_number[7][3] = 1;
+        identify_number[9][3] = 1;
+    }
+    else if (num_labels == 3) {
+        //1, 2, 3, 4, 5, 6, 8, 9
+        cout << "좌측 상단에서 우측 하단으로 선을 그을 때 접촉하는 외각선 개수 3개" << endl;
+        cout << "1, 2, 3, 4, 5, 6, 8, 9 중 하나입니다." << endl;
+        identify_number[1][3] = 1;
+        identify_number[2][3] = 1;
+        identify_number[3][3] = 1;
+        identify_number[4][3] = 1;
+        identify_number[5][3] = 1;
+        identify_number[6][3] = 1;
+        identify_number[8][3] = 1;
+        identify_number[9][3] = 1;
+    }
+    else {
+        //8, 5
+        cout << "좌측 상단에서 우측 하단으로 선을 그을 때 접촉하는 외각선 개수 4개 이상" << endl;
+        cout << "5, 8 중 하나입니다." << endl;
+        identify_number[5][3] = 1;
+        identify_number[8][3] = 1;
+    }
+}
+//5번 우측 영역(세로로 직사각형)제거하고 생기는 외각선 개수 판별 - stop
 void erase_rArea(Mat img) {
     Mat erase_area = img.clone(), lables;
     erase_area(Rect(150, 0, 100, 500)) = Scalar(0, 0, 0);
     int count = connectedComponents(erase_area, lables);
+    count -= 1; //배경 제거
     if (count == 1) {
+        cout << "우측 영역 제거시 생기는 외각선 개수 1개" << endl;
         cout << endl << "1, 4, 6, 7, 8, 9, 0 중 하나입니다." << endl;
         identify_number[0][4] = 1;
         identify_number[1][4] = 1;
@@ -256,6 +394,7 @@ void erase_rArea(Mat img) {
         identify_number[9][4] = 1;
     }
     else if (count == 2) {
+        cout << "우측 영역 제거시 생기는 외각선 개수 2개" << endl;
         cout << endl << "2, 4, 5, 7, 8 중에 하나입니다." << endl;
         identify_number[2][4] = 1;
         identify_number[4][4] = 1;
@@ -263,13 +402,13 @@ void erase_rArea(Mat img) {
         identify_number[7][4] = 1;
         identify_number[8][4] = 1;
     }
-    else { 
+    else {
+        cout << "우측 영역 제거시 생기는 외각선 개수 3개" << endl;
         cout << endl << "3 입니다" << endl;
         identify_number[3][4] = 1;
     }
 }
-//5번 특징
-
+//6번 특징
 
 //마우스 이벤트 관련 함수
 void savefile(Mat& userdata) {
@@ -295,6 +434,34 @@ Mat loadfile() {
     }
     rectangle(number, Rect(0, 0, 500, 500), Scalar(0, 0, 0), 1);
     return number;
+}
+//feature에 따라서 결과 도출 함수
+int result_number() {
+    int maxSum = 0;
+    int maxRow = 0;
+    for (int i = 0; i < rows; i++) {
+        int identifySum = 0;
+        for (int j = 0; j < cols; j++) {
+            identifySum += identify_number[i][j];
+        }
+        if (identifySum >= maxSum) {
+            maxSum = identifySum;
+            maxRow = i;
+        }
+    }
+    for (int i = 0; i < 10; i++) {
+        cout << "숫자 " << i << " : ";
+        for (int j = 0; j < 5; j++) {
+            cout << identify_number[i][j] << " ";
+        }
+        cout << endl;
+    }
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            identify_number[i][j] = 0;
+        }
+    }
+    return maxRow;
 }
 
 void on_mouse(int event, int x, int y, int flags, void* userdata) {
@@ -327,32 +494,37 @@ void on_mouse(int event, int x, int y, int flags, void* userdata) {
     }
     else if (Point(x, y).inside(feature2)) {
         turn_menu_color(*(Mat*)userdata);
-        copyimg(*(Mat*)userdata, feature2, feature1_red);
+        copyimg(*(Mat*)userdata, feature2, feature2_red);
     }
     else if (Point(x, y).inside(feature3)) {
         turn_menu_color(*(Mat*)userdata);
-        copyimg(*(Mat*)userdata, feature3, feature1_red);
+        copyimg(*(Mat*)userdata, feature3, feature3_red);
     }
     else if (Point(x, y).inside(feature4)) {
         turn_menu_color(*(Mat*)userdata);
-        copyimg(*(Mat*)userdata, feature4, feature1_red);
+        copyimg(*(Mat*)userdata, feature4, feature4_red);
     }
     else if (Point(x, y).inside(feature5)) {
         turn_menu_color(*(Mat*)userdata);
-        copyimg(*(Mat*)userdata, feature5, feature1_red);
+        copyimg(*(Mat*)userdata, feature5, feature5_red);
     }
     else {
         turn_menu_color(*(Mat*)userdata);
     }
-
+    
     switch (event) {
     case EVENT_LBUTTONDOWN:
         prePoint = Point(x, y);
         if (Point(x, y).inside(Rect(500, 300, 150, 100))) {
             //Run
-            Mat preimg = PretreatmentImg((*(Mat*)userdata)(Rect(2, 2, 497, 497)));
-            imshow("preImg", preimg);
-            waitKey();
+            Mat preimg = PretreatmentImg((*(Mat*)userdata)(Rect(2, 2, 497, 497)).clone());
+            contours_size(preimg);
+            weight_contours(preimg);
+            ru_2_ld(preimg);
+            lu_2_rd(preimg);
+            erase_rArea(preimg);
+            int identify_number = result_number();
+            cout << endl << "해당 숫자는 " << identify_number << "일 가능성이 가장 높습니다." << endl;
         }
         else if (Point(x, y).inside(Rect(500, 0, 150, 100))) {
             //Save
@@ -369,6 +541,31 @@ void on_mouse(int event, int x, int y, int flags, void* userdata) {
         else if (Point(x, y).inside(Rect(500, 400, 150, 100))) {
             //Exit
             exit(1);
+        }
+        else if (Point(x, y).inside(Rect(feature1))) {
+            //feature1
+            Mat preimg = PretreatmentImg((*(Mat*)userdata)(Rect(2, 2, 497, 497)).clone());
+            contours_size(preimg);
+        }
+        else if (Point(x, y).inside(Rect(feature2))) {
+            //feature2
+            Mat preimg = PretreatmentImg((*(Mat*)userdata)(Rect(2, 2, 497, 497)).clone());
+            weight_contours(preimg);
+        }
+        else if (Point(x, y).inside(Rect(feature3))) {
+            //feature3
+            Mat preimg = PretreatmentImg((*(Mat*)userdata)(Rect(2, 2, 497, 497)).clone());
+            ru_2_ld(preimg);
+        }
+        else if (Point(x, y).inside(Rect(feature4))) {
+            //feature4
+            Mat preimg = PretreatmentImg((*(Mat*)userdata)(Rect(2, 2, 497, 497)).clone());
+            lu_2_rd(preimg);
+        }
+        else if (Point(x, y).inside(Rect(feature5))) {
+            //feature5
+            Mat preimg = PretreatmentImg((*(Mat*)userdata)(Rect(2, 2, 497, 497)).clone());
+            erase_rArea(preimg);
         }
         break;
     case EVENT_MOUSEMOVE:
