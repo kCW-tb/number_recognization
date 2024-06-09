@@ -123,7 +123,7 @@ void weight_contours(Mat img) {
 }
 ```
 기본적 코드로 외각선의 개수와 내부 외각선이 존재할 경우 약간의 조건을 더해서 외각선의 개수를 구하는 방식을 사용함.
-
+![image](https://github.com/kCW-tb/number_recognization/assets/71691159/84b21052-47c0-4367-9575-dad620d365af)
 
 ```
 //3번 우측 상단 시작점에서 좌측 하단 끝나는 종료점까지 선을 그어 만나는 외각선 개수 판별
@@ -158,7 +158,7 @@ void erase_rArea(Mat img) {
 ```
 우측 영역의 픽셀값을 0로 만든 이후 남는 영역에 대해서 나오는 객체의 개수를 특성으로 지정함.
 
-![image](https://github.com/kCW-tb/number_recognization/assets/71691159/84b21052-47c0-4367-9575-dad620d365af)
+
 
 ```
  RotatedRect rect = minAreaRect(contours);
