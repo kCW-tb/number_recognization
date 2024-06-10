@@ -173,3 +173,14 @@ void erase_rArea(Mat img) {
 아직 특성이 충분치 않아 중복으로 모든 조건의 합이 5가 되는 경우가 존재 특성을 늘리거나 조정이 필요
 
 [중간인식과정](https://youtu.be/wSoOFS5d_Bc)
+
+
+생성중인 특성
+
+![특징에 대해](https://github.com/kCW-tb/number_recognization/assets/71691159/ebbe0ad0-c9fc-456c-a8f9-dffc12793fa6)
+
+
+좌측이 여러개의 2의 숫자에 대해 데이터를 축척하여 2의 영역을 크게 잡아둔 영역을 표현하였고
+우측은 test데이터가 들어갔을 때 얼마나 해당 영역에 들어가는지 영역을 넘어가는 픽셀이 존재하는지 확인하는 작업을 표현.
+
+
