@@ -4,22 +4,22 @@
 using namespace cv;
 using namespace std;
 
-Mat save_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Save_black.jpg");
-Mat save_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Save_red.jpg");
-Mat load_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Load_black.jpg");
-Mat load_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Load_red.jpg");
-Mat clear_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Clear_black.jpg");
-Mat clear_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Clear_red.jpg");
-Mat run_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Run_black.jpg");
-Mat run_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Run_red.jpg");
-Mat exit_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Exit_black.jpg");
-Mat exit_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Exit_red.jpg");
-Mat feature1_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature1_black.jpg");
-Mat feature2_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature2_black.jpg");
-Mat feature3_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature3_black.jpg");
-Mat feature1_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature1_red.jpg");
-Mat feature2_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature2_red.jpg");
-Mat feature3_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature3_red.jpg");
+Mat save_black = imread("./Save_black.jpg");
+Mat save_red = imread("./Save_red.jpg");
+Mat load_black = imread("./Load_black.jpg");
+Mat load_red = imread("./Load_red.jpg");
+Mat clear_black = imread("./Clear_black.jpg");
+Mat clear_red = imread("./Clear_red.jpg");
+Mat run_black = imread("./Run_black.jpg");
+Mat run_red = imread("./Run_red.jpg");
+Mat exit_black = imread("./Exit_black.jpg");
+Mat exit_red = imread("./Exit_red.jpg");
+Mat feature1_black = imread("./Feature1_black.jpg");
+Mat feature2_black = imread("./Feature2_black.jpg");
+Mat feature3_black = imread("./Feature3_black.jpg");
+Mat feature1_red = imread("./Feature1_red.jpg");
+Mat feature2_red = imread("./Feature2_red.jpg");
+Mat feature3_red = imread("./Feature3_red.jpg");
 
 //menu
 void copyimg(Mat& img, Rect area, Mat& copy);
