@@ -184,3 +184,4 @@ void erase_rArea(Mat img) {
 우측은 test데이터가 들어갔을 때 얼마나 해당 영역에 들어가는지 영역을 넘어가는 픽셀이 존재하는지 확인하는 작업을 표현.
 
 
+![new_feature](https://www.youtube.com/watch?v=doh0jG_VhyA)
