@@ -25,7 +25,7 @@ Mat feature3_red = imread("./Feature3_red.jpg");
 void copyimg(Mat& img, Rect area, Mat& copy);
 Mat drawLineImg();
 void turn_menu_color(Mat board);
-//전처리
+//pretreatment
 Mat grayThres(Mat numberimg);
 Mat get_numberArea(Mat origin_numberimg);
 void sizerepair(Mat& preImg);
@@ -70,7 +70,7 @@ int main(void)
 
 
 
-//menu 관련 함수
+//menu
 void copyimg(Mat& img, Rect area, Mat& copy) {
     resize(copy, copy, Size(120, 70));
     Point start(area.x, area.y);
@@ -113,23 +113,21 @@ void turn_menu_color(Mat board) {
     copyimg(board, Rect(650, 200, 150, 100), feature3_black);
 }
 
-//이미지 전처리 관련 함수
-//1번 GrayScale + Threshold
+// Pretreatment
+// 1. GrayScale + Threshold
 Mat grayThres(Mat numberimg) {
     cvtColor(numberimg, numberimg, COLOR_BGR2GRAY);
     threshold(numberimg, numberimg, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
     return numberimg;
 }
-//2번 모폴로지 연산
-//3번 숫자 영역 가져오기
+// 2. mopology
+// 3. get number area
 Mat get_numberArea(Mat preImg) {
     Mat labels, stats, centroids;
     int cnt = connectedComponentsWithStats(preImg, labels, stats, centroids);
-    //숫자 객체가 분리되어 있는 경우
     if (cnt > 2) {
         int largth = 7;
         while (true) {
-            //점차 증가하는 length값으로 모폴로지 연산 수행
             morphologyEx(preImg, preImg, MORPH_CLOSE, Mat(largth, largth, CV_8UC1));
             cnt = connectedComponentsWithStats(preImg, labels, stats, centroids);
             if (cnt <= 2) break;
@@ -139,21 +137,21 @@ Mat get_numberArea(Mat preImg) {
     int* p = stats.ptr<int>(1);
     return preImg(Rect(p[0], p[1], p[2], p[3])).clone();
 }
-//4번 크기조정
+//4. resize
 void sizerepair(Mat& preImg) {
     resize(preImg, preImg, Size(250, 500));
 }
-//전처리 통합 함수
+//total
 Mat PretreatmentImg(Mat origin_numberimg) {
-    Mat preImg = grayThres(origin_numberimg);   //GrayScale 변경 및 이진화
-    morphologyEx(preImg, preImg, MORPH_CLOSE, Mat(10, 10, CV_8UC1)); //모폴로지 연산
-    Mat numberImg = get_numberArea(preImg);     //숫자영역만 추출
-    sizerepair(numberImg);  //size수정
+    Mat preImg = grayThres(origin_numberimg);  
+    morphologyEx(preImg, preImg, MORPH_CLOSE, Mat(10, 10, CV_8UC1)); 
+    Mat numberImg = get_numberArea(preImg); 
+    sizerepair(numberImg);
     return numberImg;
 }
 
-//feature 관련 함수
-//1번 이미지 객체에 대해 외각선 개수 추출
+//feature
+//1. contours
 void contours_size(Mat img) {
     vector<vector<Point>> contours;
     findContours(img, contours, RETR_LIST, CHAIN_APPROX_NONE);
@@ -183,7 +181,7 @@ void contours_size(Mat img) {
         identify_number[7][0] = -1;
     }
 }
-//2번 우측 영역(세로로 직사각형)제거하고 생기는 외각선 개수 판별
+//2. erase_rArea
 void erase_rArea(Mat img) {
     Mat erase_area = img.clone(), lables;
     erase_area(Rect(150, 0, 100, 500)) = Scalar(0, 0, 0);
@@ -213,8 +211,7 @@ void erase_rArea(Mat img) {
     }
 }
 
-
-//마우스 이벤트 관련 함수
+// mouseEvent
 void savefile(Mat& userdata) {
     string fileName = "";
     Mat save = (userdata)(Rect(1, 1, 498, 498)).clone();
@@ -240,7 +237,7 @@ Mat loadfile() {
     return number;
 }
 
-//feature에 따라서 결과 도출 함수
+//get result
 int result_number() {
     int maxSum = 0;
     int maxRow = 0;
@@ -269,7 +266,7 @@ int result_number() {
     return maxRow;
 }
 
-//이미지 전처리 - 학습하기 위한 전처리
+//train for image
 Mat prepairImg_toDNN(Mat img) {
     cvtColor(img, img, COLOR_BGR2GRAY);
     threshold(img, img, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
@@ -312,7 +309,7 @@ void studyNumberData() {
         string fileName = "./all_num_data/";
         fileName += "0";
         fileName += to_string(i);
-        for (int j = 1; j <= 60; j++) { //데이터 수가 늘어난다면 60이 위치한 값을 변경
+        for (int j = 1; j <= 60; j++) { 
             string number_name = "";
             if (j < 10) number_name += ("-0" + to_string(j));
             else number_name += ("-" + to_string(j));
@@ -324,7 +321,7 @@ void studyNumberData() {
             plus_learning_number(preImg, i);
         }
     }
-    for (int i = 0; i < 10; i++) {  //데이터셋이 충분하지 않아 25 이상이면 정답으로 처리
+    for (int i = 0; i < 10; i++) {  
         threshold(learning_number[i], learning_number[i], 25, 255, THRESH_BINARY);
     }
 }
@@ -355,9 +352,9 @@ void test_number_DNN(Mat img) {
             int cnt = connectedComponents(preImg(rec), labels);
             for (int k = 0; k < 10; k++) {
                 int ex_cnt = connectedComponents(learning_number[k](rec), labels);
-                if (ex_cnt >= 2 && cnt >= 2) identify_number_D[k]++;      //2개가 겹치면 점수 +1
-                else if (ex_cnt >= 2 && cnt < 2) identify_number_D[k]--;  //test이미지는 없는데 학습은 있으면 -1
-                else if (ex_cnt < 2 && cnt >= 2) identify_number_D[k]--;  //학습 데이터는 없는데 학습은 있으면 -1
+                if (ex_cnt >= 2 && cnt >= 2) identify_number_D[k]++;      
+                else if (ex_cnt >= 2 && cnt < 2) identify_number_D[k]--;  
+                else if (ex_cnt < 2 && cnt >= 2) identify_number_D[k]--;  
             }
         }
     }
