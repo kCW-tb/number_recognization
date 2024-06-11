@@ -141,7 +141,6 @@ Mat get_numberArea(Mat preImg) {
 }
 //4번 크기조정
 void sizerepair(Mat& preImg) {
-    Mat array(400, 250, CV_8UC1);
     resize(preImg, preImg, Size(250, 500));
 }
 //전처리 통합 함수
