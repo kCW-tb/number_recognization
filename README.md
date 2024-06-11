@@ -36,6 +36,7 @@ https://github.com/kCW-tb/number_recognization/blob/6695c7893b0920aac93de3853426
 
 3번 특징이고 여러개의 이미지를 학습시키고 이에 대한 값을 저장한 이후 새로운 데이터가 들어오면 이전에 학습되어 있는 데이터를 기반으로 새로운 데이터의 숫자에 대해 추측한다.
 이미지가 많아지고 영역을 세밀하게 조정할수록 정확도를 올릴 수 있다.
+현 프로젝트는 숫자당 60개 총 600개의 숫자 이미지를 학습 데이터로 사용하였다.
 
 ![특징에 대해](https://github.com/kCW-tb/number_recognization/assets/71691159/ebbe0ad0-c9fc-456c-a8f9-dffc12793fa6)
 
