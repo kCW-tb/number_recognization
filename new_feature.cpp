@@ -17,7 +17,13 @@ int main(void) {
     }
     studyNumberData();
     Mat test = imread("save.jpg");
-    test_number(test);
+    for (int i = 0; i < 10; i++) {
+        string file_path = "C:/Users/AIRLAB/Desktop/Teachable_Machine/test_number_img/";
+        file_path += to_string(i);
+        file_path += ".png";
+        test = imread(file_path);
+        test_number(test);
+    }
     return 0;
 }
 
@@ -52,23 +58,24 @@ Mat prepairImg(Mat img) {
     return tmp;
 }
 void studyNumberData() {
-    string fileName = "./all_num_data/";
     for (int i = 0; i < 10; i++) {
-        if (i == 0) fileName += "0";
+        string fileName = "./all_num_data/";
+        fileName += "0";
         fileName += to_string(i);
         for (int j = 1; j <= 60; j++) { //데이터 수 늘어나면 여기 60을 변경
-            if (j < 10) fileName += ("-0" + to_string(j));
-            else fileName += ("-" + to_string(j));
-
-            fileName += ".png";
-
-            Mat img = imread(fileName, IMREAD_GRAYSCALE);
+            string number_name = "";
+            if (j < 10) number_name += ("-0" + to_string(j));
+            else number_name += ("-" + to_string(j));
+            number_name += ".png";
+            string final_path = fileName + number_name;
+            Mat img = imread(final_path);
+            if (img.empty()) { cout << "image is empty pls check filename : " << final_path; }
             Mat preImg = prepairImg(img);
             plus_learning_number(preImg, i);
         }
     }
-    for (int i = 0; i < 10; i++) {  //숫자 개당 60개이므로 35개 이상이면 해당 영역은 숫자의 영역으로 판단함.
-        threshold(learning_number[i], learning_number[i], 35, 255, THRESH_BINARY);
+    for (int i = 0; i < 10; i++) {  //숫자 개당 60개이므로 30개 이상이면 해당 영역은 숫자의 영역으로 판단함.
+        threshold(learning_number[i], learning_number[i], 30, 255, THRESH_BINARY);
     }
 }
 void plus_learning_number(Mat preImg, int i) {
@@ -116,5 +123,9 @@ void test_number(Mat img) {
             large_val += " ";
         }
     }
-    cout << "가장 확률이 가까운 숫자 " << maxIndex << large_val;
+    if (large_val.size() < 2) large_val = "";
+    for (int i = 0; i < 10; i++) {
+        cout << i << " 숫자일 데이터 확률들 : " << identify_number[i] << endl;
+    }   //가장 높은 3개정도의 값에 대해서 출력해야 할 듯.
+    cout << "가장 확률이 가까운 숫자 " << large_val << endl << endl;;
 }
