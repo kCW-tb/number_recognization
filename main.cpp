@@ -189,11 +189,14 @@ void contours_size(Mat img) {
 }
 //2번 우측 영역(세로로 직사각형)제거하고 생기는 외각선 개수 판별 - stop
 void erase_rArea(Mat img) {
-    Mat erase_area = img.clone(), lables;
+    Mat erase_area = img.clone(), erase_area_left = img.clone(), lables;
+    erase_area_left(Rect(100, 0, 100, 500)) = Scalar(0, 0, 0);
     erase_area(Rect(150, 0, 100, 500)) = Scalar(0, 0, 0);
     int count = connectedComponents(erase_area, lables);
+    int count_l = connectedComponents(erase_area_left, lables);
     count -= 1; //배경 제거
-    if (count == 1) {
+    count_l -= 1;
+    if (count == 1 && count_l == 1) {
         cout << "우측 영역 제거시 생기는 외각선 개수 1개" << endl << endl;
         identify_number[1][1] = 1;
         identify_number[4][1] = 1;
@@ -225,7 +228,6 @@ void erase_rArea(Mat img) {
         identify_number[8][1] = -1;
     }
 }
-
 
 //마우스 이벤트 관련 함수
 void savefile(Mat& userdata) {
