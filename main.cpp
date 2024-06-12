@@ -4,28 +4,28 @@
 using namespace cv;
 using namespace std;
 
-Mat save_black = imread("./Save_black.jpg");
-Mat save_red = imread("./Save_red.jpg");
-Mat load_black = imread("./Load_black.jpg");
-Mat load_red = imread("./Load_red.jpg");
-Mat clear_black = imread("./Clear_black.jpg");
-Mat clear_red = imread("./Clear_red.jpg");
-Mat run_black = imread("./Run_black.jpg");
-Mat run_red = imread("./Run_red.jpg");
-Mat exit_black = imread("./Exit_black.jpg");
-Mat exit_red = imread("./Exit_red.jpg");
-Mat feature1_black = imread("./Feature1_black.jpg");
-Mat feature2_black = imread("./Feature2_black.jpg");
-Mat feature3_black = imread("./Feature3_black.jpg");
-Mat feature1_red = imread("./Feature1_red.jpg");
-Mat feature2_red = imread("./Feature2_red.jpg");
-Mat feature3_red = imread("./Feature3_red.jpg");
+Mat save_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Save_black.jpg");
+Mat save_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Save_red.jpg");
+Mat load_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Load_black.jpg");
+Mat load_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Load_red.jpg");
+Mat clear_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Clear_black.jpg");
+Mat clear_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Clear_red.jpg");
+Mat run_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Run_black.jpg");
+Mat run_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Run_red.jpg");
+Mat exit_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Exit_black.jpg");
+Mat exit_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Exit_red.jpg");
+Mat feature1_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature1_black.jpg");
+Mat feature2_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature2_black.jpg");
+Mat feature3_black = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature3_black.jpg");
+Mat feature1_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature1_red.jpg");
+Mat feature2_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature2_red.jpg");
+Mat feature3_red = imread("C:/Users/AIRLAB/source/repos/OpenCV/OpenCV/Feature3_red.jpg");
 
 //menu
 void copyimg(Mat& img, Rect area, Mat& copy);
 Mat drawLineImg();
 void turn_menu_color(Mat board);
-//pretreatment
+//전처리
 Mat grayThres(Mat numberimg);
 Mat get_numberArea(Mat origin_numberimg);
 void sizerepair(Mat& preImg);
@@ -44,19 +44,23 @@ void on_mouse(int event, int x, int y, int flags, void* userdata);
 const int rows = 10;
 const int cols = 3;
 int identify_number[rows][cols] = { 0 };
-Mat learning_number[10];
-int a = 0;
+Mat learning_number[12];
 
 
 int main(void)
 {
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 12; ++i) {
         learning_number[i] = Mat::zeros(400, 300, CV_8UC1);
     }
     Mat img = drawLineImg();
     char c;
     studyNumberData();
-    a++;
+    /*
+    for (int i = 0; i < 12; ++i) {
+        imshow("learning", learning_number[i]);
+        waitKey();
+    }
+    */
     namedWindow("NUMBER");
     while (true) {
         setMouseCallback("NUMBER", on_mouse, &img);
@@ -70,7 +74,7 @@ int main(void)
 
 
 
-//menu
+//menu 관련 함수
 void copyimg(Mat& img, Rect area, Mat& copy) {
     resize(copy, copy, Size(120, 70));
     Point start(area.x, area.y);
@@ -113,21 +117,23 @@ void turn_menu_color(Mat board) {
     copyimg(board, Rect(650, 200, 150, 100), feature3_black);
 }
 
-// Pretreatment
-// 1. GrayScale + Threshold
+//이미지 전처리 관련 함수
+//1번 GrayScale + Threshold
 Mat grayThres(Mat numberimg) {
     cvtColor(numberimg, numberimg, COLOR_BGR2GRAY);
     threshold(numberimg, numberimg, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
     return numberimg;
 }
-// 2. mopology
-// 3. get number area
+//2번 모폴로지 연산
+//3번 숫자 영역 가져오기
 Mat get_numberArea(Mat preImg) {
     Mat labels, stats, centroids;
     int cnt = connectedComponentsWithStats(preImg, labels, stats, centroids);
+    //숫자 객체가 분리되어 있는 경우
     if (cnt > 2) {
         int largth = 7;
         while (true) {
+            //점차 증가하는 length값으로 모폴로지 연산 수행
             morphologyEx(preImg, preImg, MORPH_CLOSE, Mat(largth, largth, CV_8UC1));
             cnt = connectedComponentsWithStats(preImg, labels, stats, centroids);
             if (cnt <= 2) break;
@@ -137,21 +143,21 @@ Mat get_numberArea(Mat preImg) {
     int* p = stats.ptr<int>(1);
     return preImg(Rect(p[0], p[1], p[2], p[3])).clone();
 }
-//4. resize
+//4번 크기조정
 void sizerepair(Mat& preImg) {
     resize(preImg, preImg, Size(250, 500));
 }
-//total
+//전처리 통합 함수
 Mat PretreatmentImg(Mat origin_numberimg) {
-    Mat preImg = grayThres(origin_numberimg);  
-    morphologyEx(preImg, preImg, MORPH_CLOSE, Mat(10, 10, CV_8UC1)); 
-    Mat numberImg = get_numberArea(preImg); 
-    sizerepair(numberImg);
+    Mat preImg = grayThres(origin_numberimg);   //GrayScale 변경 및 이진화
+    morphologyEx(preImg, preImg, MORPH_CLOSE, Mat(10, 10, CV_8UC1)); //모폴로지 연산
+    Mat numberImg = get_numberArea(preImg);     //숫자영역만 추출
+    sizerepair(numberImg);  //size수정
     return numberImg;
 }
 
-//feature
-//1. contours
+//feature 관련 함수
+//1번 이미지 객체에 대해 외각선 개수 추출 - stop
 void contours_size(Mat img) {
     vector<vector<Point>> contours;
     findContours(img, contours, RETR_LIST, CHAIN_APPROX_NONE);
@@ -181,7 +187,7 @@ void contours_size(Mat img) {
         identify_number[7][0] = -1;
     }
 }
-//2. erase_rArea
+//2번 우측 영역(세로로 직사각형)제거하고 생기는 외각선 개수 판별 - stop
 void erase_rArea(Mat img) {
     Mat erase_area = img.clone(), lables;
     erase_area(Rect(150, 0, 100, 500)) = Scalar(0, 0, 0);
@@ -196,6 +202,8 @@ void erase_rArea(Mat img) {
         identify_number[8][1] = 1;
         identify_number[9][1] = 1;
         identify_number[0][1] = 1;
+        identify_number[3][1] = -1;
+        identify_number[5][1] = -1;
     }
     else if (count == 2) {
         cout << "우측 영역 제거시 생기는 외각선 개수 2개" << endl << endl;
@@ -204,14 +212,22 @@ void erase_rArea(Mat img) {
         identify_number[5][1] = 1;
         identify_number[7][1] = 1;
         identify_number[8][1] = 1;
+        identify_number[1][1] = -1;
+        identify_number[6][1] = -1;
+        identify_number[9][1] = -1;
     }
     else {
         cout << "우측 영역 제거시 생기는 외각선 개수 3개" << endl << endl;
         identify_number[3][1] = 1;
+        identify_number[2][1] = -1;
+        identify_number[4][1] = -1;
+        identify_number[5][1] = -1;
+        identify_number[8][1] = -1;
     }
 }
 
-// mouseEvent
+
+//마우스 이벤트 관련 함수
 void savefile(Mat& userdata) {
     string fileName = "";
     Mat save = (userdata)(Rect(1, 1, 498, 498)).clone();
@@ -237,7 +253,7 @@ Mat loadfile() {
     return number;
 }
 
-//get result
+//feature에 따라서 결과 도출 함수
 int result_number() {
     int maxSum = 0;
     int maxRow = 0;
@@ -266,7 +282,7 @@ int result_number() {
     return maxRow;
 }
 
-//train for image
+//이미지 전처리
 Mat prepairImg_toDNN(Mat img) {
     cvtColor(img, img, COLOR_BGR2GRAY);
     threshold(img, img, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
@@ -300,16 +316,20 @@ Mat prepairImg_toDNN(Mat img) {
         }
         all_img = Rect(Point(min_x, min_y), Point(max_x, max_y));
     }
+
     Mat tmp = img(all_img);
     resize(tmp, tmp, Size(300, 400));
     return tmp;
 }
 void studyNumberData() {
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 12; i++) {
         string fileName = "./all_num_data/";
-        fileName += "0";
-        fileName += to_string(i);
-        for (int j = 1; j <= 60; j++) { 
+        if (i < 10) {
+            fileName += "0";
+            fileName += to_string(i);
+        }
+        else fileName += to_string(i);
+        for (int j = 1; j <= 60; j++) { //데이터 수 늘어나면 여기 60을 변경
             string number_name = "";
             if (j < 10) number_name += ("-0" + to_string(j));
             else number_name += ("-" + to_string(j));
@@ -321,8 +341,10 @@ void studyNumberData() {
             plus_learning_number(preImg, i);
         }
     }
-    for (int i = 0; i < 10; i++) {  
-        threshold(learning_number[i], learning_number[i], 25, 255, THRESH_BINARY);
+    learning_number[2](Rect(180, 40, 60, 200)) = 40;    //학습 데이터 조정
+    learning_number[2](Rect(180, 320, 30, 40)) = 0;     //학습 데이터 조정
+    for (int i = 0; i < 12; i++) {  //숫자 개당 60개이므로 30개 이상이면 해당 영역은 숫자의 영역으로 판단함.
+        threshold(learning_number[i], learning_number[i], 30, 255, THRESH_BINARY);
     }
 }
 void plus_learning_number(Mat preImg, int i) {
@@ -339,22 +361,22 @@ void plus_learning_number(Mat preImg, int i) {
 }
 void test_number_DNN(Mat img) {
     //
-    int identify_number_D[10] = { 0, };
+    int identify_number_D[12] = { 0, };
     int index_num[2] = { 0,0 };
     int row = 40;
     int col = 30;
-
+    int count = 0;
     Mat labels, preImg;
     preImg = prepairImg_toDNN(img);
     for (int x = 0; x < 10; x++) {
         for (int y = 0; y < 10; y++) {
             Rect rec(x * col, y * row, col, row);
             int cnt = connectedComponents(preImg(rec), labels);
-            for (int k = 0; k < 10; k++) {
+            for (int k = 0; k < 12; k++) {
                 int ex_cnt = connectedComponents(learning_number[k](rec), labels);
-                if (ex_cnt >= 2 && cnt >= 2) identify_number_D[k]++;      
-                else if (ex_cnt >= 2 && cnt < 2) identify_number_D[k]--;  
-                else if (ex_cnt < 2 && cnt >= 2) identify_number_D[k]--;  
+                if (ex_cnt >= 2 && cnt >= 2) identify_number_D[k]++;      //2개가 겹치면 점수 +1
+                else if (ex_cnt >= 2 && cnt < 2) identify_number_D[k] -= 2;  //test이미지는 없는데 학습은 있으면 -1
+                else if (ex_cnt < 2 && cnt >= 2) identify_number_D[k]--;  //test이미지는 있는데 학습은 없으면 -1
             }
         }
     }
@@ -364,7 +386,7 @@ void test_number_DNN(Mat img) {
     int largest = INT_MIN;
     int second_largest = INT_MIN;
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 12; i++) {
         if (identify_number_D[i] > largest) {
             second_largest = largest;
             second_largest_index = largest_index;
@@ -380,15 +402,19 @@ void test_number_DNN(Mat img) {
     index_num[0] = largest_index;
     index_num[1] = second_largest_index;
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 12; i++) {
         cout << i << " 숫자에 대한 점수 : " << identify_number_D[i] << endl;
     }
-    cout << "가장 확률이 가까운 숫자 2개" << index_num[0] << ", " << index_num[1] << endl << endl;
+    cout << "가장 확률이 가까운 숫자 인덱스 2개  high : " << index_num[0] << ", sec high" << index_num[1] << endl << endl;
 
+    if (index_num[0] == 10 || index_num[1] == 10) identify_number[4][2] = 1;
+    if (index_num[0] == 11 || index_num[1] == 11) identify_number[1][2] = 1;
     identify_number[index_num[0]][2] = 1;
-    if (index_num[0] - index_num[1] > 3) {
-        identify_number[index_num[1]][2] = 1;
-    }
+    identify_number[index_num[1]][2] = 1;
+
+    Mat ss;
+    addWeighted(learning_number[index_num[0]], 0.3, preImg, 1, 0, ss);
+    imshow("ss", ss);
 }
 
 void on_mouse(int event, int x, int y, int flags, void* userdata) {
