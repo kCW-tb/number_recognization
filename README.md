@@ -44,6 +44,12 @@ https://github.com/kCW-tb/number_recognization/blob/6695c7893b0920aac93de3853426
 좌측이 여러개의 2의 숫자에 대해 데이터를 축척하여 2의 영역을 크게 잡아둔 영역을 표현하였고
 우측은 test데이터가 들어갔을 때 얼마나 해당 영역에 들어가는지 영역을 넘어가는 픽셀이 존재하는지 확인하는 작업을 표현.
 
+![image](https://github.com/kCW-tb/number_recognization/assets/71691159/4e5037ff-9d80-4bc6-bd01-e8c6bd74a71f)
+![image](https://github.com/kCW-tb/number_recognization/assets/71691159/8b967004-99ba-40ed-b65d-cb7cc480b598)
+
+학습 데이터로 사용한 숫자 데이터들 중 일부
+
+
 https://github.com/kCW-tb/number_recognization/blob/6695c7893b0920aac93de38534265fa0b1b99b43/main.cpp#L397-L498
 
 마우스가 이동 혹은 이벤트 발생 시 작동하는 함수이며 해당 영역 내에 들어갔을 때 이미지를 변환시키거나 각 기능을 실행시킨다.
