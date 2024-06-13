@@ -44,23 +44,23 @@ void on_mouse(int event, int x, int y, int flags, void* userdata);
 const int rows = 10;
 const int cols = 3;
 int identify_number[rows][cols] = { 0 };
-Mat learning_number[12];
+Mat learning_number[13];
 
 
 int main(void)
 {
-    for (int i = 0; i < 12; ++i) {
+    for (int i = 0; i < 13; ++i) {
         learning_number[i] = Mat::zeros(400, 300, CV_8UC1);
     }
     Mat img = drawLineImg();
     char c;
     studyNumberData();
-    /*
-    for (int i = 0; i < 12; ++i) {
+    
+    for (int i = 0; i < 13; ++i) {
         imshow("learning", learning_number[i]);
         waitKey();
     }
-    */
+    
     namedWindow("NUMBER");
     while (true) {
         setMouseCallback("NUMBER", on_mouse, &img);
@@ -170,6 +170,10 @@ void contours_size(Mat img) {
         identify_number[4][0] = 1;
         identify_number[5][0] = 1;
         identify_number[7][0] = 1;
+        identify_number[6][0] = -1;
+        identify_number[9][0] = -1;
+        identify_number[8][0] = -1;
+        identify_number[0][0] = -1;
     }
     else if (contours.size() == 2) {
         //4,6,9,0
@@ -177,8 +181,8 @@ void contours_size(Mat img) {
         identify_number[6][0] = 1;
         identify_number[9][0] = 1;
         identify_number[0][0] = 1;
-        identify_number[1][0] = -1;
         identify_number[7][0] = -1;
+        identify_number[1][0] = -1;
     }
     else {
         //0, 8
@@ -189,11 +193,13 @@ void contours_size(Mat img) {
 }
 //2번 우측 영역(세로로 직사각형)제거하고 생기는 외각선 개수 판별 - stop
 void erase_rArea(Mat img) {
-    Mat erase_area = img.clone(), erase_area_left = img.clone(), lables;
-    erase_area_left(Rect(100, 0, 100, 500)) = Scalar(0, 0, 0);
+    Mat erase_area = img.clone(), erase_area_left = img.clone(), erase_area_right = img.clone(), lables;
+    erase_area_left(Rect(100, 0, 150, 500)) = Scalar(0, 0, 0);
     erase_area(Rect(150, 0, 100, 500)) = Scalar(0, 0, 0);
+    erase_area_right(Rect(200, 0, 50, 500)) = Scalar(0, 0, 0);
     int count = connectedComponents(erase_area, lables);
     int count_l = connectedComponents(erase_area_left, lables);
+    int count_r = connectedComponents(erase_area_right, lables);
     count -= 1; //배경 제거
     count_l -= 1;
     if (count == 1 && count_l == 1) {
@@ -208,18 +214,18 @@ void erase_rArea(Mat img) {
         identify_number[3][1] = -1;
         identify_number[5][1] = -1;
     }
-    else if (count == 2) {
+    else if (count_l == 2) {
         cout << "우측 영역 제거시 생기는 외각선 개수 2개" << endl << endl;
         identify_number[2][1] = 1;
+        identify_number[1][1] = 1;
         identify_number[4][1] = 1;
         identify_number[5][1] = 1;
-        identify_number[7][1] = 1;
+        if(identify_number[7][1] == 1 && count_r == 2) identify_number[7][1] = 1;
         identify_number[8][1] = 1;
-        identify_number[1][1] = -1;
         identify_number[6][1] = -1;
         identify_number[9][1] = -1;
     }
-    else {
+    else if (count == 3) {
         cout << "우측 영역 제거시 생기는 외각선 개수 3개" << endl << endl;
         identify_number[3][1] = 1;
         identify_number[2][1] = -1;
@@ -228,6 +234,7 @@ void erase_rArea(Mat img) {
         identify_number[8][1] = -1;
     }
 }
+
 
 //마우스 이벤트 관련 함수
 void savefile(Mat& userdata) {
@@ -324,7 +331,7 @@ Mat prepairImg_toDNN(Mat img) {
     return tmp;
 }
 void studyNumberData() {
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < 13; i++) {
         string fileName = "./all_num_data/";
         if (i < 10) {
             fileName += "0";
@@ -345,7 +352,7 @@ void studyNumberData() {
     }
     learning_number[2](Rect(180, 40, 60, 200)) = 40;    //학습 데이터 조정
     learning_number[2](Rect(180, 320, 30, 40)) = 0;     //학습 데이터 조정
-    for (int i = 0; i < 12; i++) {  //숫자 개당 60개이므로 30개 이상이면 해당 영역은 숫자의 영역으로 판단함.
+    for (int i = 0; i < 13; i++) {  //숫자 개당 60개이므로 30개 이상이면 해당 영역은 숫자의 영역으로 판단함.
         threshold(learning_number[i], learning_number[i], 30, 255, THRESH_BINARY);
     }
 }
@@ -363,7 +370,7 @@ void plus_learning_number(Mat preImg, int i) {
 }
 void test_number_DNN(Mat img) {
     //
-    int identify_number_D[12] = { 0, };
+    int identify_number_D[13] = { 0, };
     int index_num[2] = { 0,0 };
     int row = 40;
     int col = 30;
@@ -374,11 +381,11 @@ void test_number_DNN(Mat img) {
         for (int y = 0; y < 10; y++) {
             Rect rec(x * col, y * row, col, row);
             int cnt = connectedComponents(preImg(rec), labels);
-            for (int k = 0; k < 12; k++) {
+            for (int k = 0; k < 13; k++) {
                 int ex_cnt = connectedComponents(learning_number[k](rec), labels);
-                if (ex_cnt >= 2 && cnt >= 2) identify_number_D[k]++;      //2개가 겹치면 점수 +1
-                else if (ex_cnt >= 2 && cnt < 2) identify_number_D[k] -= 2;  //test이미지는 없는데 학습은 있으면 -1
-                else if (ex_cnt < 2 && cnt >= 2) identify_number_D[k]--;  //test이미지는 있는데 학습은 없으면 -1
+                if (ex_cnt >= 2 && cnt >= 2) identify_number_D[k] += 2;      //2개가 겹치면 점수 +1
+                else if (ex_cnt >= 2 && cnt < 2) identify_number_D[k] -= 1;  //test이미지는 없는데 학습은 있으면
+                else if (ex_cnt < 2 && cnt >= 2) identify_number_D[k] -= 2;  //test이미지는 있는데 학습은 없으면
             }
         }
     }
@@ -388,7 +395,7 @@ void test_number_DNN(Mat img) {
     int largest = INT_MIN;
     int second_largest = INT_MIN;
 
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < 13; i++) {
         if (identify_number_D[i] > largest) {
             second_largest = largest;
             second_largest_index = largest_index;
@@ -404,15 +411,24 @@ void test_number_DNN(Mat img) {
     index_num[0] = largest_index;
     index_num[1] = second_largest_index;
 
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < 13; i++) {
         cout << i << " 숫자에 대한 점수 : " << identify_number_D[i] << endl;
     }
-    cout << "가장 확률이 가까운 숫자 인덱스 2개  high : " << index_num[0] << ", sec high" << index_num[1] << endl << endl;
+    cout << "가장 확률이 가까운 숫자 인덱스 2개  high : " << index_num[0] << ", sec high : " << index_num[1] << endl << endl;
 
-    if (index_num[0] == 10 || index_num[1] == 10) identify_number[4][2] = 1;
-    if (index_num[0] == 11 || index_num[1] == 11) identify_number[1][2] = 1;
-    identify_number[index_num[0]][2] = 1;
-    identify_number[index_num[1]][2] = 1;
+    if (index_num[0] == 10) index_num[0] = 4;
+    else if (index_num[1] == 10) index_num[1] = 4;
+    if (index_num[0] == 11) index_num[0] = 1;
+    else if (index_num[1] == 11) index_num[1] = 1;
+    if (index_num[0] == 12) index_num[0] = 2;
+    else if (index_num[1] == 12) index_num[1] = 2;
+    if (index_num[0] - index_num[1] < 5) {
+        identify_number[index_num[0]][2] = 1;
+    }
+    else {
+        identify_number[index_num[0]][2] = 1;
+        identify_number[index_num[1]][2] = 1;
+    }
 
     Mat ss;
     addWeighted(learning_number[index_num[0]], 0.3, preImg, 1, 0, ss);
