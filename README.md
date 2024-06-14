@@ -58,3 +58,5 @@ https://github.com/kCW-tb/number_recognization/blob/6695c7893b0920aac93de3853426
 **최종 결과 영상**
 
 [최종 작동 영상](https://youtu.be/UH-VKuOvG74)
+
+[특징 출력과 결과 영상](https://www.youtube.com/watch?v=tEuhGJNG6go)
