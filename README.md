@@ -2,7 +2,7 @@
 
 **이미지 전처리 관련 함수**
 
-https://github.com/kCW-tb/number_recognization/blob/6695c7893b0920aac93de38534265fa0b1b99b43/main.cpp#L116-L153
+https://github.com/kCW-tb/number_recognization/blob/7e91ea707141c4eb9d0e42fd00720907c46f29ac/main.cpp#L112C1-L147C2
 
 1. 이미지 전처리 단계로 GrayScale 및 이진화를 진행해준다
 2. 모폴로지 연산을 통해 미약한 거리를 연결시킨다
